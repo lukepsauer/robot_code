@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -52,6 +53,15 @@ public class RobotControl {
         this.nw = this.hwMap.dcMotor.get("nw");
         this.se = this.hwMap.dcMotor.get("se");
         this.sw = this.hwMap.dcMotor.get("sw");
+        ne.setDirection(DcMotorSimple.Direction.REVERSE);
+        nw.setDirection(DcMotorSimple.Direction.REVERSE);
+        se.setDirection(DcMotorSimple.Direction.REVERSE);
+        sw.setDirection(DcMotorSimple.Direction.REVERSE);
+        ne.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        se.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        sw.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        nw.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         this.imu = this.hwMap.get(BNO055IMU.class, "imu");
 
         int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
@@ -125,21 +135,29 @@ public class RobotControl {
                 float tY = trans.get(1);
                 float tZ = trans.get(2);
 
+                float rX = rot.firstAngle;
+                double rY = rot.secondAngle;
+                double rZ = rot.thirdAngle;
+
+
                 location.add(tX);
                 location.add(tY);
                 location.add(tZ);
+                location.add(rX);
+
+
 
 
                 // telemetry.addData("X: ", (float) tX);
                 // telemetry.addData("Y: ", tY);
                 // telemetry.addData("Z :", tZ);
 
-                return location;
+
+                    return location;
+
 
                 // Extract the rotational components of the target relative to the robot
-//                double rX = rot.firstAngle;
-//                double rY = rot.secondAngle;
-//                double rZ = rot.thirdAngle;
+//
             }
             else{
                 return null;
@@ -160,7 +178,7 @@ public class RobotControl {
     }
 
     public void setMotors(float x, float y, float rot) {
-        double drive = (double) -y, strafe = (double) x, spin = (double) rot;
+        double drive = (double) y, strafe = (double) x, spin = (double) rot;
         double nePower, nwPower, sePower, swPower;
 
         nwPower = Range.clip(drive + strafe + spin, -1, 1);
